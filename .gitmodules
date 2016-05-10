@@ -1,0 +1,3 @@
+[submodule "deps/source/jerryscript"]
+	path = deps/source/jerryscript
+	url = https://github.com/Samsung/jerryscript
