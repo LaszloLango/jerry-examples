@@ -77,11 +77,6 @@ main (int argc, char * argv[])
                            false,
                            &my_js_obj_val);
 
-  if (status != JERRY_COMPLETION_CODE_OK)
-  {
-    fprintf(stderr, "kiscica\n");
-  }
-
   jerry_api_object_t *object_p = jerry_api_get_object_value (&my_js_obj_val);
 
   /* Create a JS function object and wrap into a jerry value */
