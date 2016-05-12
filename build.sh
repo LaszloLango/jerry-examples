@@ -5,7 +5,6 @@ JERRY_HOME="$CURRENT_DIR/deps/source/jerryscript"
 CONFIG=debug
 BIN_DIR="$CURRENT_DIR/bin"
 
-
 rm -rf ${BIN_DIR}
 mkdir -p ${BIN_DIR}
 
@@ -62,6 +61,12 @@ gcc -std=c99 -static -g -Wall \
 
 gcc -std=c99 -static -g -Wall \
     -o ${BIN_DIR}/example6 src/example6.c \
+    -I'deps/include' -I'include' \
+    -flto -L'deps/lib' \
+    -ljerry-core -ljerry-libm
+
+gcc -std=c99 -static -g -Wall \
+    -o ${BIN_DIR}/example7 src/example7.c \
     -I'deps/include' -I'include' \
     -flto -L'deps/lib' \
     -ljerry-core -ljerry-libm

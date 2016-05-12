@@ -93,8 +93,8 @@ main (int argc, char * argv[])
                            false,
                            &eval_ret);
 
-   /* Free JavaScript value, returned by eval */
-   jerry_api_release_value (&eval_ret);
+  /* Free JavaScript value, returned by eval */
+  jerry_api_release_value (&eval_ret);
 
   /* Cleanup engine */
   jerry_cleanup ();
