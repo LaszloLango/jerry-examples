@@ -148,5 +148,5 @@ main (int argc, char * argv[])
   // Cleanup engine
   jerry_cleanup ();
 
-  return status;
+  return (int) status;
 }

@@ -63,7 +63,7 @@ main (int argc, char * argv[])
                                     &object_value);
   jerry_api_release_value (&object_value);
 
-  /* Wrap the (now it is not empty) JS object into a jerry api value */
+  /* Wrap the JS object (not empty anymore) into a jerry api value */
   object_value.type = JERRY_API_DATA_TYPE_OBJECT;
   object_value.u.v_object = object_p;
   jerry_api_object_t *global_obj_p = jerry_api_get_global ();
@@ -77,11 +77,13 @@ main (int argc, char * argv[])
 
   /* Now we have a "builtin" object called MyObject with a function called myFunc()
    *
-   * Equalent JS code:
-   *                  var MyObject = { myFunc() { return "some string value"; } }
+   * Equivalent JS code:
+   *                    var MyObject = { myFunc : function () { return "some string value"; } }
    */
-  const jerry_api_char_t script[] = "var str = MyObject.myFunc(); \
-                                     print (str);";
+  const jerry_api_char_t script[] = " \
+    var str = MyObject.myFunc (); \
+    print (str); \
+  ";
   size_t script_size = strlen ((const char *) script);
 
   jerry_api_value_t eval_ret;
@@ -99,5 +101,5 @@ main (int argc, char * argv[])
   /* Cleanup engine */
   jerry_cleanup ();
 
-  return status;
+  return (int) status;
 }

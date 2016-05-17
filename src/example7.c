@@ -60,16 +60,19 @@ main (int argc, char * argv[])
   jerry_init (JERRY_FLAG_EMPTY);
 
   /* Create a JS object */
-  const jerry_api_char_t my_js_object[] = "MyObject = \
-  { x : 12, \
-    y : 'Value of x is ', \
-    foo: function () \
-    { \
-      return this.y + this.x; \
+  const jerry_api_char_t my_js_object[] = " \
+    MyObject = \
+    { x : 12, \
+      y : 'Value of x is ', \
+      foo: function () \
+      { \
+        return this.y + this.x; \
+      } \
     } \
-  }";
+  ";
 
   jerry_api_value_t my_js_obj_val;
+
   /* Evaluate script */
   status = jerry_api_eval (my_js_object,
                            strlen ((const char *) my_js_object),
@@ -93,10 +96,12 @@ main (int argc, char * argv[])
   /* Free JavaScript value, returned by eval (my_js_object) */
   jerry_api_release_value (&my_js_obj_val);
 
-  const jerry_api_char_t script[] = "var str = MyObject.foo (); \
-                                     print (str); \
-                                     MyObject.add2x (5); \
-                                     print (MyObject.foo());";
+  const jerry_api_char_t script[] = " \
+    var str = MyObject.foo (); \
+    print (str); \
+    MyObject.add2x (5); \
+    print (MyObject.foo ()); \
+  ";
   size_t script_size = strlen ((const char *) script);
 
   jerry_api_value_t eval_ret;
@@ -114,5 +119,5 @@ main (int argc, char * argv[])
   /* Cleanup engine */
   jerry_cleanup ();
 
-  return status;
+  return (int) status;
 }
