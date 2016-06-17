@@ -27,5 +27,5 @@ main (int argc, char * argv[])
                                                           script_size,
                                                           JERRY_FLAG_EMPTY);
 
-  return return_code;
+  return (int) return_code;
 }
