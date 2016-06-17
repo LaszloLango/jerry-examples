@@ -19,44 +19,42 @@
 
 int
 main (int argc, char * argv[]) {
-  const jerry_api_char_t str[] = "Hello, World!";
-  const jerry_api_char_t var_name[] = "s";
-  const jerry_api_char_t script[] = "print (s);";
+  const jerry_char_t str[] = "Hello, World!";
+  const jerry_char_t var_name[] = "s";
+  const jerry_char_t script[] = "print (s);";
 
   // Initializing JavaScript environment
   jerry_init (JERRY_FLAG_EMPTY);
 
   // Getting pointer to the Global object
-  jerry_api_object_t *object_p = jerry_api_get_global ();
+  jerry_object_t *object_p = jerry_get_global ();
 
   // Constructing string
-  jerry_api_string_t *str_val_p = jerry_api_create_string (str);
+  jerry_string_t *str_val_p = jerry_create_string (str);
 
   // Constructing string value descriptor
-  jerry_api_value_t value;
-  value.type = JERRY_API_DATA_TYPE_STRING;
-  value.u.v_string = str_val_p;
+  jerry_value_t value = jerry_create_string_value (str_val_p);
 
   // Setting the string value to field of the Global object
-  jerry_api_set_object_field_value (object_p, var_name, &value);
+  jerry_set_object_field_value (object_p, var_name, value);
 
   // Releasing string value, as it is no longer necessary outside of engine
-  jerry_api_release_string (str_val_p);
+  jerry_release_string (str_val_p);
 
   // Same for pointer to the Global object
-  jerry_api_release_object (object_p);
+  jerry_release_object (object_p);
 
-  jerry_api_value_t eval_ret;
+  jerry_value_t eval_ret;
 
   // Now starting script that would output value of just initialized field
-  jerry_api_eval (script,
-                  strlen ((const char *) script),
-                  false,
-                  false,
-                  &eval_ret);
+  jerry_eval (script,
+              strlen ((const char *) script),
+              false,
+              false,
+              &eval_ret);
 
   // Free JavaScript value, returned by eval
-  jerry_api_release_value (&eval_ret);
+  jerry_release_value (eval_ret);
 
   // Freeing engine
   jerry_cleanup ();

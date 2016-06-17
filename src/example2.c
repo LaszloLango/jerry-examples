@@ -20,29 +20,29 @@
 int
 main (int argc, char * argv[])
 {
-  const jerry_api_char_t script[] = "print ('Hello, World!');";
+  const jerry_char_t script[] = "print ('Hello, World!');";
   size_t script_size = strlen ((const char *) script);
 
   // Initialize engine
   jerry_init (JERRY_FLAG_EMPTY);
 
   // Setup Global scope code
-  jerry_api_object_t *error_object_p = NULL;
+  jerry_object_t *error_object_p = NULL;
   if (!jerry_parse (script, script_size, &error_object_p))
   {
     // Error object must be freed, if parsing is failed
-    jerry_api_release_object (error_object_p);
+    jerry_release_object (error_object_p);
   }
   else
   {
     // Execute Global scope code
-    jerry_api_value_t error_value = jerry_api_create_void_value ();
+    jerry_value_t error_value = jerry_create_undefined_value ();
     jerry_completion_code_t return_code = jerry_run (&error_value);
 
     if (return_code == JERRY_COMPLETION_CODE_UNHANDLED_EXCEPTION)
     {
       // Error value must be freed, if 'jerry_run' returns with an unhandled exception
-      jerry_api_release_value (&error_value);
+      jerry_release_value (error_value);
     }
   }
 

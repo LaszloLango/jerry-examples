@@ -11,25 +11,27 @@ IS_JERRY=`ls deps/source/jerryscript`
 
 if [ -z "$IS_JERRY" ]
 then
+  echo "Init JerryScript repository"
   git submodule update --recursive --init
 fi
 
-rm -rf ${BIN_DIR}
-mkdir -p ${BIN_DIR}
+rm -vrf ${BIN_DIR}
+mkdir -vp ${BIN_DIR}
 
-rm -rf ${LIBRARIES_DIR}
-mkdir -p ${LIBRARIES_DIR}
+rm -vrf ${LIBRARIES_DIR}
+mkdir -vp ${LIBRARIES_DIR}
 
-rm -rf ${INCLUDE_DIR}
-mkdir -p ${INCLUDE_DIR}
+rm -vrf ${INCLUDE_DIR}
+mkdir -vp ${INCLUDE_DIR}
 
-cp "$JERRY_HOME/jerry-core/jerry-api.h" "$INCLUDE_DIR/jerry-api.h"
-cp "$JERRY_HOME/jerry-core/jerry-port.h" "$INCLUDE_DIR/jerry-port.h"
-cp "$JERRY_HOME/jerry-core/jerry-snapshot.h" "$INCLUDE_DIR/jerry-snapshot.h"
-cp "$JERRY_HOME/jerry-core/jerry.h" "$INCLUDE_DIR/jerry.h"
+cp -v "$JERRY_HOME/jerry-core/jerry-api.h" "$INCLUDE_DIR/jerry-api.h"
+cp -v "$JERRY_HOME/jerry-core/jerry-port.h" "$INCLUDE_DIR/jerry-port.h"
+cp -v "$JERRY_HOME/jerry-core/jerry-snapshot.h" "$INCLUDE_DIR/jerry-snapshot.h"
+cp -v "$JERRY_HOME/jerry-core/jerry.h" "$INCLUDE_DIR/jerry.h"
 
 cd $JERRY_HOME
-make clean
+VERBOSE=1 make clean
+echo "Building JerryScript..."
 make ${CONFIG}.linux
 STATUS=$?
 cd $BASE_DIR
@@ -40,48 +42,48 @@ then
   exit $STATUS
 fi
 
-cp "$JERRY_HOME/build/obj/linux/jerry-core/lib$CONFIG.jerry-core.a" "$LIBRARIES_DIR/libjerry-core.a"
-cp "$JERRY_HOME/build/obj/linux/jerry-libc/lib$CONFIG.jerry-libc.linux.lib.a" "$LIBRARIES_DIR/libjerry-libc.a"
-cp "$JERRY_HOME/build/obj/linux/jerry-libm/lib$CONFIG.jerry-libm.lib.a" "$LIBRARIES_DIR/libjerry-libm.a"
+cp -v "$JERRY_HOME/build/obj/linux/jerry-core/lib$CONFIG.jerry-core.a" "$LIBRARIES_DIR/libjerry-core.a"
+cp -v "$JERRY_HOME/build/obj/linux/jerry-libc/lib$CONFIG.jerry-libc.linux.lib.a" "$LIBRARIES_DIR/libjerry-libc.a"
+cp -v "$JERRY_HOME/build/obj/linux/jerry-libm/lib$CONFIG.jerry-libm.lib.a" "$LIBRARIES_DIR/libjerry-libm.a"
 
-gcc -std=c99 -static -g -Wall \
+gcc -std=c99 -nostdlib -static -g -Wall \
     -o ${BIN_DIR}/example1 src/example1.c \
     -I'deps/include' -I'include' \
     -flto -L'deps/lib' \
-    -ljerry-core -ljerry-libm
+    -ljerry-core -ljerry-libm -ljerry-libc -lgcc
 
-gcc -std=c99 -static -g -Wall \
+gcc -std=c99 -nostdlib -static -g -Wall \
     -o ${BIN_DIR}/example2 src/example2.c \
     -I'deps/include' -I'include' \
     -flto -L'deps/lib' \
-    -ljerry-core -ljerry-libm
+    -ljerry-core -ljerry-libm -ljerry-libc -lgcc
 
-gcc -std=c99 -static -g -Wall \
+gcc -std=c99 -nostdlib -static -g -Wall \
     -o ${BIN_DIR}/example3 src/example3.c \
     -I'deps/include' -I'include' \
     -flto -L'deps/lib' \
-    -ljerry-core -ljerry-libm
+    -ljerry-core -ljerry-libm -ljerry-libc -lgcc
 
-gcc -std=c99 -static -g -Wall \
+gcc -std=c99 -nostdlib -static -g -Wall \
     -o ${BIN_DIR}/example4 src/example4.c \
     -I'deps/include' -I'include' \
     -flto -L'deps/lib' \
-    -ljerry-core -ljerry-libm
+    -ljerry-core -ljerry-libm -ljerry-libc -lgcc
 
-gcc -std=c99 -static -g -Wall \
+gcc -std=c99 -nostdlib -static -g -Wall \
     -o ${BIN_DIR}/example5 src/example5.c \
     -I'deps/include' -I'include' \
     -flto -L'deps/lib' \
-    -ljerry-core -ljerry-libm
+    -ljerry-core -ljerry-libm -ljerry-libc -lgcc
 
-gcc -std=c99 -static -g -Wall \
+gcc -std=c99 -nostdlib -static -g -Wall \
     -o ${BIN_DIR}/example6 src/example6.c \
     -I'deps/include' -I'include' \
     -flto -L'deps/lib' \
-    -ljerry-core -ljerry-libm
+    -ljerry-core -ljerry-libm -ljerry-libc -lgcc
 
-gcc -std=c99 -static -g -Wall \
+gcc -std=c99 -nostdlib -static -g -Wall \
     -o ${BIN_DIR}/example7 src/example7.c \
     -I'deps/include' -I'include' \
     -flto -L'deps/lib' \
-    -ljerry-core -ljerry-libm
+    -ljerry-core -ljerry-libm -ljerry-libc -lgcc

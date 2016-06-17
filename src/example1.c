@@ -20,7 +20,7 @@
 int
 main (int argc, char * argv[])
 {
-  const jerry_api_char_t script[] = "print ('Hello, World!');";
+  const jerry_char_t script[] = "print ('Hello, World!');";
   size_t script_size = strlen ((const char *) script);
 
   jerry_completion_code_t return_code = jerry_run_simple (script,

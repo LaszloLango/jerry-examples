@@ -20,132 +20,114 @@
 #include "jerry.h"
 
 static void
-print_value (const jerry_api_value_t *value_p)
+print_value (const jerry_value_t value)
 {
-  switch (value_p->type)
+  if (jerry_value_is_undefined (value))
   {
-    // Simple values: void, undefined, null, false, true
-    case JERRY_API_DATA_TYPE_VOID:
+    jerry_port_logmsg (stdout, "undefined");
+  }
+  else if (jerry_value_is_null (value))
+  {
+    jerry_port_logmsg (stdout, "null");
+  }
+  else if (jerry_value_is_boolean (value))
+  {
+    if (jerry_get_boolean_value (value))
     {
-      printf ("void");
-      break;
+      jerry_port_logmsg (stdout, "true");
     }
-    case JERRY_API_DATA_TYPE_UNDEFINED:
+    else
     {
-      printf ("undefined");
-      break;
-    }
-    case JERRY_API_DATA_TYPE_NULL:
-    {
-      printf ("null");
-      break;
-    }
-    case JERRY_API_DATA_TYPE_BOOLEAN:
-    {
-      if (value_p->u.v_bool)
-      {
-        printf ("true");
-      }
-      else
-      {
-        printf ("false");
-      }
-      break;
-    }
-    // Float value
-    case JERRY_API_DATA_TYPE_FLOAT32:
-    {
-      printf ("%f", value_p->u.v_float32);
-      break;
-    }
-    // Double value
-    case JERRY_API_DATA_TYPE_FLOAT64:
-    {
-      printf ("%lf", value_p->u.v_float64);
-      break;
-    }
-    // Unsigned integer value
-    case JERRY_API_DATA_TYPE_UINT32:
-    {
-      printf ("%d", value_p->u.v_uint32);
-      break;
-    }
-    // String value
-    case JERRY_API_DATA_TYPE_STRING:
-    {
-      // Determining required buffer size
-      jerry_api_size_t req_sz = jerry_api_get_string_size (value_p->u.v_string);
-      jerry_api_char_t *str_buf_p = (jerry_api_char_t *) malloc (req_sz);
-      jerry_api_string_to_char_buffer (value_p->u.v_string,
-                                       str_buf_p,
-                                       req_sz);
-
-      printf ("%s", (const char *) str_buf_p);
-
-      free (str_buf_p);
-      break;
-    }
-    // Object reference
-    case JERRY_API_DATA_TYPE_OBJECT:
-    {
-      printf ("[JS object]");
-      break;
+      jerry_port_logmsg (stdout, "false");
     }
   }
+  /*  Float value */
+  else if (jerry_value_is_number (value))
+  {
+    jerry_port_logmsg (stdout, "number");
+  }
+  /*  String value */
+  else if (jerry_value_is_string (value))
+  {
+    /*  Determining required buffer size */
+    jerry_string_t *str_p = jerry_get_string_value (value);
+    jerry_size_t req_sz = jerry_get_string_size (str_p);
+    jerry_char_t str_buf_p[req_sz];
 
-  printf ("\n");
+    jerry_string_to_char_buffer (str_p, str_buf_p, req_sz);
+
+    jerry_port_logmsg (stdout, "%s", (const char *) str_buf_p);
+  }
+  /*  Object reference */
+  else if (jerry_value_is_object (value))
+  {
+    jerry_port_logmsg (stdout, "[JS object]");
+  }
+
+  jerry_port_logmsg (stdout, "\n");
 }
-
-static void print_value (const jerry_api_value_t *value_p);
 
 int
 main (int argc, char * argv[])
 {
   jerry_completion_code_t status = JERRY_COMPLETION_CODE_OK;
+  bool is_done = false;
 
-  // Initialize engine
+  /*  Initialize engine */
   jerry_init (JERRY_FLAG_EMPTY);
 
-  char cmd [256];
-  while (true)
+  while (!is_done)
   {
-    printf ("> ");
+    char cmd [256];
+    char *cmd_tail = cmd;
+    size_t len = 0;
 
-    // Input next command
-    if (fgets (cmd, sizeof (cmd), stdin) == NULL
-        || strcmp (cmd, "quit\n") == 0)
+    jerry_port_logmsg (stdout, "> ");
+
+    /* Read next command */
+    while (true)
     {
-      // If the command is 'quit', exit from loop
-      break;
+      if (fread (cmd_tail, 1, 1, stdin) != 1 && len == 0)
+      {
+        is_done = true;
+        break;
+      }
+      if (*cmd_tail == '\n')
+      {
+        break;
+      }
+
+      cmd_tail++;
+      len++;
     }
 
-    jerry_api_value_t ret_val;
+    jerry_value_t ret_val;
 
-    // Evaluate entered command
-    status = jerry_api_eval ((const jerry_api_char_t *) cmd,
-                             strlen (cmd),
-                             false,
-                             false,
-                             &ret_val);
+    /*  Evaluate entered command */
+    status = jerry_eval ((const jerry_char_t *) cmd,
+                         len,
+                         false,
+                         false,
+                         &ret_val);
 
-    // If command evaluated successfully, print value, returned by eval
+    /*  If command evaluated successfully, print value, returned by eval */
     if (status == JERRY_COMPLETION_CODE_OK)
     {
-      // 'eval' completed successfully
-      print_value (&ret_val);
-      jerry_api_release_value (&ret_val);
+      /*  'eval' completed successfully */
+      print_value (ret_val);
     }
     else
     {
-      // Evaluated JS code thrown an exception
-      // and didn't handle it with try-catch-finally
-      printf ("Unhandled JS exception occured\n");
+      /*  Evaluated JS code thrown an exception
+       *  and didn't handle it with try-catch-finally */
+      jerry_port_errormsg ("Unhandled JS exception occured: ");
+      print_value (ret_val);
     }
 
-    fflush (stdout);
+    jerry_release_value (ret_val);
   }
 
-  // Cleanup engine
+  /*  Cleanup engine */
   jerry_cleanup ();
 
   return (int) status;
