@@ -23,40 +23,40 @@ main (int argc, char * argv[]) {
   const jerry_char_t var_name[] = "s";
   const jerry_char_t script[] = "print (s);";
 
-  // Initializing JavaScript environment
+  /* Initializing JavaScript environment */
   jerry_init (JERRY_FLAG_EMPTY);
 
-  // Getting pointer to the Global object
+  /* Getting pointer to the Global object */
   jerry_object_t *object_p = jerry_get_global ();
 
-  // Constructing string
+  /* Constructing string */
   jerry_string_t *str_val_p = jerry_create_string (str);
 
-  // Constructing string value descriptor
+  /* Constructing string value descriptor */
   jerry_value_t value = jerry_create_string_value (str_val_p);
 
-  // Setting the string value to field of the Global object
+  /* Setting the string value to field of the Global object */
   jerry_set_object_field_value (object_p, var_name, value);
 
-  // Releasing string value, as it is no longer necessary outside of engine
+  /* Releasing string value, as it is no longer necessary outside of engine */
   jerry_release_string (str_val_p);
 
-  // Same for pointer to the Global object
+  /* Same for pointer to the Global object */
   jerry_release_object (object_p);
 
   jerry_value_t eval_ret;
 
-  // Now starting script that would output value of just initialized field
+  /* Now starting script that would output value of just initialized field */
   jerry_eval (script,
               strlen ((const char *) script),
               false,
               false,
               &eval_ret);
 
-  // Free JavaScript value, returned by eval
+  /* Free JavaScript value, returned by eval */
   jerry_release_value (eval_ret);
 
-  // Freeing engine
+  /* Freeing engine */
   jerry_cleanup ();
 
   return 0;

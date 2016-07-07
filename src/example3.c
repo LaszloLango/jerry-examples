@@ -23,32 +23,32 @@ main (int argc, char * argv[])
   const jerry_char_t script_1[] = "var s = 'Hello, World!';";
   const jerry_char_t script_2[] = "print (s);";
 
-  // Initialize engine
+  /* Initialize engine */
   jerry_init (JERRY_FLAG_EMPTY);
 
   jerry_value_t eval_ret;
 
-  // Evaluate script1
+  /* Evaluate script1 */
   jerry_eval (script_1,
               strlen ((const char *) script_1),
               false,
               false,
               &eval_ret);
 
-  // Free JavaScript value, returned by eval
+  /* Free JavaScript value, returned by eval */
   jerry_release_value (eval_ret);
 
-  // Evaluate script2
+  /* Evaluate script2 */
   jerry_eval (script_2,
               strlen ((const char *) script_2),
               false,
               false,
               &eval_ret);
 
-  // Free JavaScript value, returned by eval
+  /* Free JavaScript value, returned by eval */
   jerry_release_value (eval_ret);
 
-  // Cleanup engine
+  /* Cleanup engine */
   jerry_cleanup ();
 
   return 0;

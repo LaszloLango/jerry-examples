@@ -41,15 +41,15 @@ print_value (const jerry_value_t value)
       jerry_port_logmsg (stdout, "false");
     }
   }
-  /*  Float value */
+  /* Float value */
   else if (jerry_value_is_number (value))
   {
     jerry_port_logmsg (stdout, "number");
   }
-  /*  String value */
+  /* String value */
   else if (jerry_value_is_string (value))
   {
-    /*  Determining required buffer size */
+    /* Determining required buffer size */
     jerry_string_t *str_p = jerry_get_string_value (value);
     jerry_size_t req_sz = jerry_get_string_size (str_p);
     jerry_char_t str_buf_p[req_sz];
@@ -58,7 +58,7 @@ print_value (const jerry_value_t value)
 
     jerry_port_logmsg (stdout, "%s", (const char *) str_buf_p);
   }
-  /*  Object reference */
+  /* Object reference */
   else if (jerry_value_is_object (value))
   {
     jerry_port_logmsg (stdout, "[JS object]");
@@ -73,7 +73,7 @@ main (int argc, char * argv[])
   jerry_completion_code_t status = JERRY_COMPLETION_CODE_OK;
   bool is_done = false;
 
-  /*  Initialize engine */
+  /* Initialize engine */
   jerry_init (JERRY_FLAG_EMPTY);
 
   while (!is_done)
@@ -103,22 +103,22 @@ main (int argc, char * argv[])
 
     jerry_value_t ret_val;
 
-    /*  Evaluate entered command */
+    /* Evaluate entered command */
     status = jerry_eval ((const jerry_char_t *) cmd,
                          len,
                          false,
                          false,
                          &ret_val);
 
-    /*  If command evaluated successfully, print value, returned by eval */
+    /* If command evaluated successfully, print value, returned by eval */
     if (status == JERRY_COMPLETION_CODE_OK)
     {
-      /*  'eval' completed successfully */
+      /* 'eval' completed successfully */
       print_value (ret_val);
     }
     else
     {
-      /*  Evaluated JS code thrown an exception
+      /* Evaluated JS code thrown an exception
        *  and didn't handle it with try-catch-finally */
       jerry_port_errormsg ("Unhandled JS exception occured: ");
       print_value (ret_val);
@@ -127,7 +127,7 @@ main (int argc, char * argv[])
     jerry_release_value (ret_val);
   }
 
-  /*  Cleanup engine */
+  /* Cleanup engine */
   jerry_cleanup ();
 
   return (int) status;
