@@ -15,49 +15,46 @@
  */
 
 #include <string.h>
-#include "jerry.h"
+#include "jerry-api.h"
 
 /**
  * Add param to 'this.x'
  */
-static bool
-add_handler (const jerry_object_t *function_obj_p, /**< function object */
-             const jerry_value_t this_p, /**< this arg */
+static jerry_value_t
+add_handler (const jerry_value_t func_value, /**< function object */
+             const jerry_value_t this_val, /**< this arg */
              const jerry_value_t *args_p, /**< function arguments */
-             const jerry_length_t args_cnt, /**< number of function arguments */
-             jerry_value_t *ret_val_p) /**< [out] return argument */
+             const jerry_length_t args_cnt) /**< number of function arguments */
 {
   /* Get 'this.x' */
-  jerry_value_t x_val = jerry_get_object_field_value (jerry_get_object_value (this_p),
-                                                      (const jerry_char_t *) "x");
+  jerry_value_t prop_name = jerry_create_string ((const jerry_char_t *) "x");
+  jerry_value_t x_val = jerry_get_property (this_val, prop_name);
 
-
-  if (!jerry_value_is_error (x_val))
+  if (!jerry_value_has_error_flag (x_val))
   {
     /* Convert Jerry API values to double */
     double x = jerry_get_number_value (x_val);
     double d = jerry_get_number_value (*args_p);
 
     /* Add the parameter to 'x' */
-    jerry_value_t res_val = jerry_create_number_value (x + d);
+    jerry_value_t res_val = jerry_create_number (x + d);
 
     /* Set the new value of 'this.x' */
-    jerry_set_object_field_value (jerry_get_object_value (this_p),
-                                  (const jerry_char_t *) "x",
-                                  res_val);
-
+    jerry_set_property (this_val, prop_name, res_val);
+    jerry_release_value (res_val);
   }
 
-  return true;
+  jerry_release_value (x_val);
+  jerry_release_value (prop_name);
+
+  return jerry_create_undefined ();
 } /* add_handler */
 
 int
 main (int argc, char * argv[])
 {
-  jerry_completion_code_t status = JERRY_COMPLETION_CODE_OK;
-
   /* Initialize engine */
-  jerry_init (JERRY_FLAG_EMPTY);
+  jerry_init (JERRY_INIT_EMPTY);
 
   /* Create a JS object */
   const jerry_char_t my_js_object[] = " \
@@ -74,23 +71,18 @@ main (int argc, char * argv[])
   jerry_value_t my_js_obj_val;
 
   /* Evaluate script */
-  status = jerry_eval (my_js_object,
-                       strlen ((const char *) my_js_object),
-                       false,
-                       false,
-                       &my_js_obj_val);
-
-  jerry_object_t *object_p = jerry_get_object_value (my_js_obj_val);
+  my_js_obj_val = jerry_eval (my_js_object,
+                              strlen ((const char *) my_js_object),
+                              false);
 
   /* Create a JS function object and wrap into a jerry value */
-  jerry_object_t *add_func_obj_p = jerry_create_external_function (add_handler);
-  jerry_value_t object_value = jerry_create_object_value (add_func_obj_p);
+  jerry_value_t add_func_obj = jerry_create_external_function (add_handler);
 
   /* Set the native function as a property of previously created MyObject */
-  jerry_set_object_field_value (object_p,
-                                (const jerry_char_t *) "add2x",
-                                object_value);
-  jerry_release_value (object_value);
+  jerry_value_t prop_name = jerry_create_string ((const jerry_char_t *) "add2x");
+  jerry_set_property (my_js_obj_val, prop_name, add_func_obj);
+  jerry_release_value (add_func_obj);
+  jerry_release_value (prop_name);
 
   /* Free JavaScript value, returned by eval (my_js_object) */
   jerry_release_value (my_js_obj_val);
@@ -103,14 +95,8 @@ main (int argc, char * argv[])
   ";
   size_t script_size = strlen ((const char *) script);
 
-  jerry_value_t eval_ret;
-
   /* Evaluate script */
-  status = jerry_eval (script,
-                       script_size,
-                       false,
-                       false,
-                       &eval_ret);
+  jerry_value_t eval_ret = jerry_eval (script, script_size, false);
 
   /* Free JavaScript value, returned by eval */
   jerry_release_value (eval_ret);
@@ -118,5 +104,5 @@ main (int argc, char * argv[])
   /* Cleanup engine */
   jerry_cleanup ();
 
-  return (int) status;
+  return 0;
 }

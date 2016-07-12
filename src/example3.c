@@ -15,7 +15,7 @@
  */
 
 #include <string.h>
-#include "jerry.h"
+#include "jerry-api.h"
 
 int
 main (int argc, char * argv[])
@@ -24,26 +24,22 @@ main (int argc, char * argv[])
   const jerry_char_t script_2[] = "print (s);";
 
   /* Initialize engine */
-  jerry_init (JERRY_FLAG_EMPTY);
+  jerry_init (JERRY_INIT_EMPTY);
 
   jerry_value_t eval_ret;
 
   /* Evaluate script1 */
-  jerry_eval (script_1,
-              strlen ((const char *) script_1),
-              false,
-              false,
-              &eval_ret);
+  eval_ret = jerry_eval (script_1,
+                         strlen ((const char *) script_1),
+                         false);
 
   /* Free JavaScript value, returned by eval */
   jerry_release_value (eval_ret);
 
   /* Evaluate script2 */
-  jerry_eval (script_2,
-              strlen ((const char *) script_2),
-              false,
-              false,
-              &eval_ret);
+  eval_ret = jerry_eval (script_2,
+                         strlen ((const char *) script_2),
+                         false);
 
   /* Free JavaScript value, returned by eval */
   jerry_release_value (eval_ret);

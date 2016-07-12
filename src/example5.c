@@ -17,7 +17,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "jerry.h"
+#include "jerry-api.h"
+#include "jerry-port.h"
 
 static void
 print_value (const jerry_value_t value)
@@ -50,11 +51,10 @@ print_value (const jerry_value_t value)
   else if (jerry_value_is_string (value))
   {
     /* Determining required buffer size */
-    jerry_string_t *str_p = jerry_get_string_value (value);
-    jerry_size_t req_sz = jerry_get_string_size (str_p);
+    jerry_size_t req_sz = jerry_get_string_size (value);
     jerry_char_t str_buf_p[req_sz];
 
-    jerry_string_to_char_buffer (str_p, str_buf_p, req_sz);
+    jerry_string_to_char_buffer (value, str_buf_p, req_sz);
 
     jerry_port_logmsg (stdout, "%s", (const char *) str_buf_p);
   }
@@ -70,11 +70,10 @@ print_value (const jerry_value_t value)
 int
 main (int argc, char * argv[])
 {
-  jerry_completion_code_t status = JERRY_COMPLETION_CODE_OK;
   bool is_done = false;
 
   /* Initialize engine */
-  jerry_init (JERRY_FLAG_EMPTY);
+  jerry_init (JERRY_INIT_EMPTY);
 
   while (!is_done)
   {
@@ -104,31 +103,24 @@ main (int argc, char * argv[])
     jerry_value_t ret_val;
 
     /* Evaluate entered command */
-    status = jerry_eval ((const jerry_char_t *) cmd,
-                         len,
-                         false,
-                         false,
-                         &ret_val);
+    ret_val = jerry_eval ((const jerry_char_t *) cmd,
+                          len,
+                          false);
 
     /* If command evaluated successfully, print value, returned by eval */
-    if (status == JERRY_COMPLETION_CODE_OK)
-    {
-      /* 'eval' completed successfully */
-      print_value (ret_val);
-    }
-    else
+    if (jerry_value_has_error_flag (ret_val))
     {
       /* Evaluated JS code thrown an exception
        *  and didn't handle it with try-catch-finally */
       jerry_port_errormsg ("Unhandled JS exception occured: ");
-      print_value (ret_val);
     }
 
+    print_value (ret_val);
     jerry_release_value (ret_val);
   }
 
   /* Cleanup engine */
   jerry_cleanup ();
 
-  return (int) status;
+  return 0;
 }

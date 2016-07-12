@@ -15,43 +15,37 @@
  */
 
 #include <string.h>
-#include "jerry.h"
+#include "jerry-api.h"
 
 int
 main (int argc, char * argv[]) {
   const jerry_char_t str[] = "Hello, World!";
-  const jerry_char_t var_name[] = "s";
   const jerry_char_t script[] = "print (s);";
 
   /* Initializing JavaScript environment */
-  jerry_init (JERRY_FLAG_EMPTY);
+  jerry_init (JERRY_INIT_EMPTY);
 
   /* Getting pointer to the Global object */
-  jerry_object_t *object_p = jerry_get_global ();
+  jerry_value_t global_object = jerry_get_global_object ();
 
-  /* Constructing string */
-  jerry_string_t *str_val_p = jerry_create_string (str);
+  /* Constructing strings */
+  jerry_value_t prop_name = jerry_create_string ((const jerry_char_t *) "s");
+  jerry_value_t prop_value = jerry_create_string (str);
 
-  /* Constructing string value descriptor */
-  jerry_value_t value = jerry_create_string_value (str_val_p);
+  /* Setting the string value as a property of the Global object */
+  jerry_set_property (global_object, prop_name, prop_value);
 
-  /* Setting the string value to field of the Global object */
-  jerry_set_object_field_value (object_p, var_name, value);
+  /* Releasing string values, as it is no longer necessary outside of engine */
+  jerry_release_value (prop_name);
+  jerry_release_value (prop_value);
 
-  /* Releasing string value, as it is no longer necessary outside of engine */
-  jerry_release_string (str_val_p);
-
-  /* Same for pointer to the Global object */
-  jerry_release_object (object_p);
-
-  jerry_value_t eval_ret;
+  /* Releasing the Global object */
+  jerry_release_value (global_object);
 
   /* Now starting script that would output value of just initialized field */
-  jerry_eval (script,
-              strlen ((const char *) script),
-              false,
-              false,
-              &eval_ret);
+  jerry_value_t eval_ret = jerry_eval (script,
+                                       strlen ((const char *) script),
+                                       false);
 
   /* Free JavaScript value, returned by eval */
   jerry_release_value (eval_ret);

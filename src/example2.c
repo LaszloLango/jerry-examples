@@ -15,7 +15,7 @@
  */
  
 #include <string.h>
-#include "jerry.h"
+#include "jerry-api.h"
 
 int
 main (int argc, char * argv[])
@@ -24,27 +24,22 @@ main (int argc, char * argv[])
   size_t script_size = strlen ((const char *) script);
 
   /* Initialize engine */
-  jerry_init (JERRY_FLAG_EMPTY);
+  jerry_init (JERRY_INIT_EMPTY);
 
   /* Setup Global scope code */
-  jerry_object_t *error_object_p = NULL;
-  if (!jerry_parse (script, script_size, &error_object_p))
-  {
-    /* Error object must be freed, if parsing failed */
-    jerry_release_object (error_object_p);
-  }
-  else
-  {
-    /* Execute Global scope code */
-    jerry_value_t error_value = jerry_create_undefined_value ();
-    jerry_completion_code_t return_code = jerry_run (&error_value);
+  jerry_value_t parsed_code = jerry_parse (script, script_size, false);
 
-    if (return_code == JERRY_COMPLETION_CODE_UNHANDLED_EXCEPTION)
-    {
-      /* Error value must be freed, if 'jerry_run' returns with an unhandled exception */
-      jerry_release_value (error_value);
-    }
+  if (!jerry_value_has_error_flag (parsed_code))
+  {
+    /* Execute the parsed source code in the Global scope */
+    jerry_value_t ret_value = jerry_run (parsed_code);
+
+    /* Returned value must be freed */
+    jerry_release_value (ret_value);
   }
+
+  /* Parsed source code must be freed */
+  jerry_release_value (parsed_code);
 
   /* Cleanup engine */
   jerry_cleanup ();

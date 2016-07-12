@@ -15,7 +15,7 @@
  */
 
 #include <string.h>
-#include "jerry.h"
+#include "jerry-api.h"
 
 struct my_struct
 {
@@ -25,53 +25,45 @@ struct my_struct
 /**
  * Get a string from a native object
  */
-static bool
-get_msg_handler (const jerry_object_t *function_obj_p, /**< function object */
-                 const jerry_value_t this_p, /**< this arg */
+static jerry_value_t
+get_msg_handler (const jerry_value_t func_value, /**< function object */
+                 const jerry_value_t this_value, /**< this arg */
                  const jerry_value_t *args_p, /**< function arguments */
-                 const jerry_length_t args_cnt, /**< number of function arguments */
-                 jerry_value_t *ret_val_p) /**< [out] return argument */
+                 const jerry_length_t args_cnt) /**< number of function arguments */
 {
-  jerry_string_t *msg_str_p = jerry_create_string ((const jerry_char_t *) my_struct.msg);
-  *ret_val_p = jerry_create_string_value (msg_str_p);
-
-  return true;
+  return jerry_create_string ((const jerry_char_t *) my_struct.msg);
 } /* get_msg_handler */
 
 int
 main (int argc, char * argv[])
 {
-  jerry_completion_code_t status = JERRY_COMPLETION_CODE_OK;
-
   /* Initialize engine */
-  jerry_init (JERRY_FLAG_EMPTY);
+  jerry_init (JERRY_INIT_EMPTY);
 
   /* Do something with the native object */
   my_struct.msg = "Hello World";
 
   /* Create an empty JS object */
-  jerry_object_t *object_p = jerry_create_object ();
+  jerry_value_t object = jerry_create_object ();
 
   /* Create a JS function object and wrap into a jerry value */
-  jerry_object_t *func_obj_p = jerry_create_external_function (get_msg_handler);
-  jerry_value_t object_value = jerry_create_object_value (func_obj_p);
+  jerry_value_t func_obj = jerry_create_external_function (get_msg_handler);
 
   /* Set the native function as a property of the empty JS object */
-  jerry_set_object_field_value (object_p,
-                                (const jerry_char_t *) "myFunc",
-                                object_value);
-  jerry_release_value (object_value);
+  jerry_value_t prop_name = jerry_create_string ((const jerry_char_t *) "myFunc");
+  jerry_set_property (object, prop_name, func_obj);
+  jerry_release_value (prop_name);
+  jerry_release_value (func_obj);
 
   /* Wrap the JS object (not empty anymore) into a jerry api value */
-  object_value = jerry_create_object_value (object_p);
-  jerry_object_t *global_obj_p = jerry_get_global ();
+  jerry_value_t global_object = jerry_get_global_object ();
 
   /* Add the JS object to the global context */
-  jerry_set_object_field_value (global_obj_p,
-                                (const jerry_char_t *) "MyObject",
-                                object_value);
-  jerry_release_value (object_value);
-  jerry_release_object (global_obj_p);
+  prop_name = jerry_create_string ((const jerry_char_t *) "MyObject");
+  jerry_set_property (global_object, prop_name, object);
+  jerry_release_value (prop_name);
+  jerry_release_value (object);
+  jerry_release_value (global_object);
 
   /* Now we have a "builtin" object called MyObject with a function called myFunc()
    *
@@ -84,14 +76,8 @@ main (int argc, char * argv[])
   ";
   size_t script_size = strlen ((const char *) script);
 
-  jerry_value_t eval_ret;
-
   /* Evaluate script */
-  status = jerry_eval (script,
-                       script_size,
-                       false,
-                       false,
-                       &eval_ret);
+  jerry_value_t eval_ret = jerry_eval (script, script_size, false);
 
   /* Free JavaScript value, returned by eval */
   jerry_release_value (eval_ret);
@@ -99,5 +85,5 @@ main (int argc, char * argv[])
   /* Cleanup engine */
   jerry_cleanup ();
 
-  return (int) status;
+  return 0;
 }

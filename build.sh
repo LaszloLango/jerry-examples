@@ -27,7 +27,6 @@ mkdir -vp ${INCLUDE_DIR}
 cp -v "$JERRY_HOME/jerry-core/jerry-api.h" "$INCLUDE_DIR/jerry-api.h"
 cp -v "$JERRY_HOME/jerry-core/jerry-port.h" "$INCLUDE_DIR/jerry-port.h"
 cp -v "$JERRY_HOME/jerry-core/jerry-snapshot.h" "$INCLUDE_DIR/jerry-snapshot.h"
-cp -v "$JERRY_HOME/jerry-core/jerry.h" "$INCLUDE_DIR/jerry.h"
 
 cd $JERRY_HOME
 VERBOSE=1 make clean

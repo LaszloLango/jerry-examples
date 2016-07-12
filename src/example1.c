@@ -15,7 +15,7 @@
  */
  
 #include <string.h>
-#include "jerry.h"
+#include "jerry-api.h"
 
 int
 main (int argc, char * argv[])
@@ -23,9 +23,7 @@ main (int argc, char * argv[])
   const jerry_char_t script[] = "print ('Hello, World!');";
   size_t script_size = strlen ((const char *) script);
 
-  jerry_completion_code_t return_code = jerry_run_simple (script,
-                                                          script_size,
-                                                          JERRY_FLAG_EMPTY);
+  bool ret_value = jerry_run_simple (script, script_size, JERRY_INIT_EMPTY);
 
-  return (int) return_code;
+  return (ret_value ? 1 : 0);
 }
