@@ -15,7 +15,8 @@
  */
  
 #include <string.h>
-#include "jerry-api.h"
+#include "jerryscript.h"
+#include "jerryscript-ext/handler.h"
 
 int
 main (int argc, char * argv[])
@@ -25,6 +26,10 @@ main (int argc, char * argv[])
 
   /* Initialize engine */
   jerry_init (JERRY_INIT_EMPTY);
+
+  /* Register 'print' function from the extensions */
+  jerryx_handler_register_global ((const jerry_char_t *) "print",
+                                  jerryx_handler_print);
 
   /* Setup Global scope code */
   jerry_value_t parsed_code = jerry_parse (script, script_size, false);

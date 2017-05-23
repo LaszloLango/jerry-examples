@@ -14,38 +14,38 @@
  * limitations under the License.
  */
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "jerry-api.h"
-#include "jerry-port.h"
+#include "jerryscript.h"
+#include "jerryscript-ext/handler.h"
 
 static void
 print_value (const jerry_value_t value)
 {
   if (jerry_value_is_undefined (value))
   {
-    jerry_port_console ("undefined");
+    printf ("undefined");
   }
   else if (jerry_value_is_null (value))
   {
-    jerry_port_console ("null");
+    printf ("null");
   }
   else if (jerry_value_is_boolean (value))
   {
     if (jerry_get_boolean_value (value))
     {
-      jerry_port_console ("true");
+      printf ("true");
     }
     else
     {
-      jerry_port_console ("false");
+      printf ("false");
     }
   }
   /* Float value */
   else if (jerry_value_is_number (value))
   {
-    jerry_port_console ("number");
+    printf ("number");
   }
   /* String value */
   else if (jerry_value_is_string (value))
@@ -56,15 +56,15 @@ print_value (const jerry_value_t value)
 
     jerry_string_to_char_buffer (value, str_buf_p, req_sz);
 
-    jerry_port_console ("%s", (const char *) str_buf_p);
+    printf ("%s", (const char *) str_buf_p);
   }
   /* Object reference */
   else if (jerry_value_is_object (value))
   {
-    jerry_port_console ("[JS object]");
+    printf ("[JS object]");
   }
 
-  jerry_port_console ("\n");
+  printf ("\n");
 }
 
 int
@@ -75,13 +75,17 @@ main (int argc, char * argv[])
   /* Initialize engine */
   jerry_init (JERRY_INIT_EMPTY);
 
+  /* Register 'print' function from the extensions */
+  jerryx_handler_register_global ((const jerry_char_t *) "print",
+                                  jerryx_handler_print);
+
   while (!is_done)
   {
     char cmd [256];
     char *cmd_tail = cmd;
     size_t len = 0;
 
-    jerry_port_console ("> ");
+    printf ("> ");
 
     /* Read next command */
     while (true)
@@ -112,7 +116,7 @@ main (int argc, char * argv[])
     {
       /* Evaluated JS code thrown an exception
        *  and didn't handle it with try-catch-finally */
-      jerry_port_console ("Unhandled JS exception occured: ");
+      printf ("Unhandled JS exception occured: ");
     }
 
     print_value (ret_val);

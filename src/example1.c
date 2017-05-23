@@ -15,12 +15,12 @@
  */
  
 #include <string.h>
-#include "jerry-api.h"
+#include "jerryscript.h"
 
 int
 main (int argc, char * argv[])
 {
-  const jerry_char_t script[] = "print ('Hello, World!');";
+  const jerry_char_t script[] = "var str = 'Hello, World!;";
   size_t script_size = strlen ((const char *) script);
 
   bool ret_value = jerry_run_simple (script, script_size, JERRY_INIT_EMPTY);

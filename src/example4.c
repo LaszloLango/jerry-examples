@@ -15,7 +15,8 @@
  */
 
 #include <string.h>
-#include "jerry-api.h"
+#include "jerryscript.h"
+#include "jerryscript-ext/handler.h"
 
 int
 main (int argc, char * argv[]) {
@@ -24,6 +25,10 @@ main (int argc, char * argv[]) {
 
   /* Initializing JavaScript environment */
   jerry_init (JERRY_INIT_EMPTY);
+
+  /* Register 'print' function from the extensions */
+  jerryx_handler_register_global ((const jerry_char_t *) "print",
+                                  jerryx_handler_print);
 
   /* Getting pointer to the Global object */
   jerry_value_t global_object = jerry_get_global_object ();

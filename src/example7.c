@@ -15,7 +15,8 @@
  */
 
 #include <string.h>
-#include "jerry-api.h"
+#include "jerryscript.h"
+#include "jerryscript-ext/handler.h"
 
 /**
  * Add param to 'this.x'
@@ -55,6 +56,10 @@ main (int argc, char * argv[])
 {
   /* Initialize engine */
   jerry_init (JERRY_INIT_EMPTY);
+
+  /* Register 'print' function from the extensions */
+  jerryx_handler_register_global ((const jerry_char_t *) "print",
+                                  jerryx_handler_print);
 
   /* Create a JS object */
   const jerry_char_t my_js_object[] = " \
