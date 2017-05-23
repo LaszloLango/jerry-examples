@@ -52,7 +52,7 @@ add_handler (const jerry_value_t func_value, /**< function object */
 } /* add_handler */
 
 int
-main (int argc, char * argv[])
+main (int argc, char *argv[])
 {
   /* Initialize engine */
   jerry_init (JERRY_INIT_EMPTY);

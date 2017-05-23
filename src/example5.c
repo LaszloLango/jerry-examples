@@ -55,6 +55,7 @@ print_value (const jerry_value_t value)
     jerry_char_t str_buf_p[req_sz];
 
     jerry_string_to_char_buffer (value, str_buf_p, req_sz);
+    str_buf_p[req_sz] = '\0';
 
     printf ("%s", (const char *) str_buf_p);
   }
@@ -68,7 +69,7 @@ print_value (const jerry_value_t value)
 }
 
 int
-main (int argc, char * argv[])
+main (int argc, char *argv[])
 {
   bool is_done = false;
 
@@ -81,7 +82,7 @@ main (int argc, char * argv[])
 
   while (!is_done)
   {
-    char cmd [256];
+    char cmd[256] = {};
     char *cmd_tail = cmd;
     size_t len = 0;
 
@@ -102,6 +103,12 @@ main (int argc, char * argv[])
 
       cmd_tail++;
       len++;
+    }
+
+    /* If the command is "quit", break the loop */
+    if (!strncmp (cmd, "quit\n", strlen ("quit\n")))
+    {
+      break;
     }
 
     jerry_value_t ret_val;

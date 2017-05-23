@@ -36,7 +36,7 @@ get_msg_handler (const jerry_value_t func_value, /**< function object */
 } /* get_msg_handler */
 
 int
-main (int argc, char * argv[])
+main (int argc, char *argv[])
 {
   /* Initialize engine */
   jerry_init (JERRY_INIT_EMPTY);

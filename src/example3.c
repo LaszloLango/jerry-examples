@@ -19,7 +19,7 @@
 #include "jerryscript-ext/handler.h"
 
 int
-main (int argc, char * argv[])
+main (int argc, char *argv[])
 {
   const jerry_char_t script_1[] = "var s = 'Hello, World!';";
   const jerry_char_t script_2[] = "print (s);";
